@@ -75,7 +75,7 @@ public class ShizukuManager {
     public static String executeAdbCommandWithResult(String[] command) {
         try {
             if (!Shizuku.pingBinder()) {
-                return "错误：Shizuku binder 未激活或未授权。请打开 Shizuku 并授权 GIMI 原神模组加载器。\n" +
+                return "错误：Shizuku binder 未激活或未授权。请打开 Shizuku 并授权 GIMI 原神mod加载器。\n" +
                        "Binder 诊断：" + binderError;
             }
             java.lang.reflect.Method method = Shizuku.class.getDeclaredMethod(

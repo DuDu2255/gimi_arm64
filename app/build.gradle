@@ -40,7 +40,7 @@ if (!isArm64Host) {
 
         applicationVariants.all { variant ->
             variant.outputs.all {
-                outputFileName = 'GIMI 原神模组加载器.apk'
+                outputFileName = 'GIMI 原神mod加载器.apk'
             }
         }
     }
@@ -59,7 +59,7 @@ if (!isArm64Host) {
             def outDir = file("${buildDir}/outputs/apk/debug")
             outDir.mkdirs()
             copy {
-                from '../GIMI 原神模组加载器.apk'
+                from '../GIMI 原神mod加载器.apk'
                 into outDir
             }
         }

@@ -2,7 +2,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # gimi_arm64 — Lightweight Termux Build & Packaging Script
 # Compiles C++20 libgimi_arm64.so, processes Android resources, compiles
-# Kotlin & Java sources (kotlinc + D8), and signs GIMI 原神模组加载器.apk.
+# Kotlin & Java sources (kotlinc + D8), and signs GIMI 原神mod加载器.apk.
 # ─────────────────────────────────────────────────────────────────────────────
 
 set -e
@@ -227,8 +227,8 @@ if [ ! -f "build/dex/classes.dex" ] || [ ! -s "build/dex/classes.dex" ]; then
     exit 1
 fi
 
-# ─── 6. Assemble, Align & Sign GIMI 原神模组加载器.apk ─────────────────────────────
-echo -e "\n${YELLOW}📦 Assembling, aligning, and signing GIMI 原神模组加载器.apk...${NC}"
+# ─── 6. Assemble, Align & Sign GIMI 原神mod加载器.apk ─────────────────────────────
+echo -e "\n${YELLOW}📦 Assembling, aligning, and signing GIMI 原神mod加载器.apk...${NC}"
 
 # Extract base resources if available, otherwise prepare fresh structure
 rm -rf build/apk_contents/*
@@ -264,7 +264,7 @@ cd "$ROOT_DIR"
 
 UNALIGNED_APK="build/GIMI-Launcher-unaligned.apk"
 ALIGNED_APK="build/GIMI-Launcher-aligned.apk"
-FINAL_APK="GIMI 原神模组加载器.apk"
+FINAL_APK="GIMI 原神mod加载器.apk"
 
 # Zipalign
 if command -v zipalign >/dev/null 2>&1 && [ -f "$UNALIGNED_APK" ]; then
