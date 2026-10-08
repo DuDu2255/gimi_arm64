@@ -174,7 +174,7 @@ public class MainActivity extends Activity {
                         Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
                         startActivity(intent);
                     } catch (Exception e2) {
-                        Toast.makeText(this, "Grant All Files Access manually in Settings", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "请在系统设置中手动授予“所有文件访问”权限", Toast.LENGTH_LONG).show();
                     }
                 }
             }
@@ -197,13 +197,13 @@ public class MainActivity extends Activity {
         headerLayout.setPadding(8, 8, 8, 20);
 
         TextView titleText = new TextView(this);
-        titleText.setText("GIMI Launcher");
+        titleText.setText("GIMI 启动器");
         titleText.setTextColor(Color.parseColor("#00E5FF"));
         titleText.setTextSize(26f);
         titleText.setTypeface(null, Typeface.BOLD);
 
         TextView subtitleText = new TextView(this);
-        subtitleText.setText("Vulkan 3D Model Importer • ARM64 Android Native");
+        subtitleText.setText("Vulkan 3D 模型导入器 • Android ARM64 原生版");
         subtitleText.setTextColor(Color.parseColor("#B0BEC5"));
         subtitleText.setTextSize(13f);
 
@@ -240,9 +240,9 @@ public class MainActivity extends Activity {
         tabParams.setMargins(0, 20, 0, 0);
         tabBar.setLayoutParams(tabParams);
 
-        tabDashboardBtn = createTabButton("Dashboard", true);
-        tabModsBtn = createTabButton("Mod Manager", false);
-        tabSettingsBtn = createTabButton("Settings", false);
+        tabDashboardBtn = createTabButton("控制台", true);
+        tabModsBtn = createTabButton("模组管理", false);
+        tabSettingsBtn = createTabButton("设置", false);
 
         tabDashboardBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -331,13 +331,13 @@ public class MainActivity extends Activity {
         // 1. Vulkan Layer Status Card
         LinearLayout vulkanCard = createCardLayout();
         TextView vulkanTitle = new TextView(this);
-        vulkanTitle.setText("Vulkan Layer Status");
+        vulkanTitle.setText("Vulkan 层状态");
         vulkanTitle.setTextColor(Color.parseColor("#00E5FF"));
         vulkanTitle.setTextSize(16f);
         vulkanTitle.setTypeface(null, Typeface.BOLD);
 
         vulkanStatusText = new TextView(this);
-        vulkanStatusText.setText("🔴 INACTIVE (Layer Disconnected)");
+        vulkanStatusText.setText("🔴 未启用（图形层未连接）");
         vulkanStatusText.setTextColor(Color.parseColor("#FF5252"));
         vulkanStatusText.setTextSize(14f);
         vulkanStatusText.setTypeface(null, Typeface.BOLD);
@@ -350,20 +350,20 @@ public class MainActivity extends Activity {
         // 2. ADB Privilege Status Card
         LinearLayout adbCard = createCardLayout();
         TextView adbTitle = new TextView(this);
-        adbTitle.setText("ADB Privilege Status (WRITE_SECURE_SETTINGS)");
+        adbTitle.setText("ADB 权限状态（WRITE_SECURE_SETTINGS）");
         adbTitle.setTextColor(Color.parseColor("#00E5FF"));
         adbTitle.setTextSize(16f);
         adbTitle.setTypeface(null, Typeface.BOLD);
 
         adbStatusText = new TextView(this);
-        adbStatusText.setText("⚠️ Privilege Pending");
+        adbStatusText.setText("⚠️ 等待权限");
         adbStatusText.setTextColor(Color.parseColor("#FF9100"));
         adbStatusText.setTextSize(14f);
         adbStatusText.setTypeface(null, Typeface.BOLD);
         adbStatusText.setPadding(0, 6, 0, 8);
 
         TextView adbInstructionText = new TextView(this);
-        adbInstructionText.setText("Run this ADB command on PC / Termux / LADB to grant privileges:");
+        adbInstructionText.setText("在电脑、Termux 或 LADB 中执行以下 ADB 命令以授予权限：");
         adbInstructionText.setTextColor(Color.parseColor("#B0BEC5"));
         adbInstructionText.setTextSize(12f);
 
@@ -387,7 +387,7 @@ public class MainActivity extends Activity {
         adbCommandBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                copyToClipboard(grantCommand, "Comando copiado!");
+                copyToClipboard(grantCommand, "命令已复制！");
             }
         });
 
@@ -401,7 +401,7 @@ public class MainActivity extends Activity {
         btnRow.setLayoutParams(btnRowParams);
 
         Button copyBtn = new Button(this);
-        copyBtn.setText("Copy Command 📋");
+        copyBtn.setText("复制命令 📋");
         copyBtn.setTextSize(12f);
         copyBtn.setAllCaps(false);
         LinearLayout.LayoutParams copyParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
@@ -412,12 +412,12 @@ public class MainActivity extends Activity {
         copyBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                copyToClipboard(grantCommand, "Comando copiado!");
+                copyToClipboard(grantCommand, "命令已复制！");
             }
         });
 
         Button checkBtn = new Button(this);
-        checkBtn.setText("Check Permission 🔄");
+        checkBtn.setText("检查权限 🔄");
         checkBtn.setTextSize(12f);
         checkBtn.setAllCaps(false);
         LinearLayout.LayoutParams checkParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
@@ -437,7 +437,7 @@ public class MainActivity extends Activity {
         btnRow.addView(checkBtn);
 
         toggleManualBtn = new Button(this);
-        toggleManualBtn.setText("Show Manual ADB Settings Commands ▼");
+        toggleManualBtn.setText("显示手动 ADB 设置命令 ▼");
         toggleManualBtn.setTextSize(11f);
         toggleManualBtn.setAllCaps(false);
         toggleManualBtn.setBackground(null);
@@ -447,10 +447,10 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 if (manualCommandsBox.getVisibility() == View.GONE) {
                     manualCommandsBox.setVisibility(View.VISIBLE);
-                    toggleManualBtn.setText("Hide Manual ADB Settings Commands ▲");
+                    toggleManualBtn.setText("隐藏手动 ADB 设置命令 ▲");
                 } else {
                     manualCommandsBox.setVisibility(View.GONE);
-                    toggleManualBtn.setText("Show Manual ADB Settings Commands ▼");
+                    toggleManualBtn.setText("显示手动 ADB 设置命令 ▼");
                 }
             }
         });
@@ -491,12 +491,12 @@ public class MainActivity extends Activity {
         manualCommandsBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                copyToClipboard(manualCmdsText, "Comandos manuais copiados!");
+                copyToClipboard(manualCmdsText, "手动命令已复制！");
             }
         });
 
         Button shizukuBtn = new Button(this);
-        shizukuBtn.setText("⚡ Conceder Permissão Auto via Shizuku");
+        shizukuBtn.setText("⚡ 通过 Shizuku 自动授予权限");
         shizukuBtn.setTextSize(12f);
         shizukuBtn.setAllCaps(false);
         shizukuBtn.setBackground(createButtonDrawable("#00B0FF"));
@@ -513,22 +513,22 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 if (checkSelfPermission("moe.shizuku.manager.permission.API_V23") != PackageManager.PERMISSION_GRANTED) {
                     requestPermissions(new String[]{"moe.shizuku.manager.permission.API_V23"}, 1002);
-                    Toast.makeText(MainActivity.this, "Por favor, autorize o acesso no pop-up do Shizuku.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "请在 Shizuku 弹窗中授权访问。", Toast.LENGTH_LONG).show();
                 } else {
                     String res = com.gimi.launcher.service.ShizukuManager.grantSecureSettingsViaShizuku(MainActivity.this);
                     if ("SUCCESS".equals(res)) {
-                        Toast.makeText(MainActivity.this, "Permissão WRITE_SECURE_SETTINGS concedida via Shizuku! ✔", Toast.LENGTH_LONG).show();
+                        Toast.makeText(MainActivity.this, "已通过 Shizuku 授予 WRITE_SECURE_SETTINGS 权限！✔", Toast.LENGTH_LONG).show();
                     } else {
                         new android.app.AlertDialog.Builder(MainActivity.this)
-                            .setTitle("Erro de Execução Shizuku")
+                            .setTitle("Shizuku 执行错误")
                             .setMessage(res)
-                            .setPositiveButton("Copiar Erro", new android.content.DialogInterface.OnClickListener() {
+                            .setPositiveButton("复制错误", new android.content.DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(android.content.DialogInterface dialog, int which) {
-                                    copyToClipboard(res, "Detalhes do erro copiados!");
+                                    copyToClipboard(res, "错误详情已复制！");
                                 }
                             })
-                            .setNegativeButton("Fechar", null)
+                            .setNegativeButton("关闭", null)
                             .show();
                     }
                 }
@@ -549,7 +549,7 @@ public class MainActivity extends Activity {
         // 3. Target Game Variant & Injection Control Card
         LinearLayout gameCard = createCardLayout();
         TextView gameTitle = new TextView(this);
-        gameTitle.setText("Target Game Variant & Controls");
+        gameTitle.setText("目标游戏版本与控制");
         gameTitle.setTextColor(Color.parseColor("#00E5FF"));
         gameTitle.setTextSize(16f);
         gameTitle.setTypeface(null, Typeface.BOLD);
@@ -557,7 +557,7 @@ public class MainActivity extends Activity {
 
         // Graphics API Mode Selector
         TextView apiLabel = new TextView(this);
-        apiLabel.setText("Graphics API Interception Mode:");
+        apiLabel.setText("图形 API 拦截模式：");
         apiLabel.setTextColor(Color.parseColor("#B0BEC5"));
         apiLabel.setTextSize(12f);
         apiLabel.setPadding(0, 10, 0, 2);
@@ -586,7 +586,7 @@ public class MainActivity extends Activity {
 
         // Game Package Spinner
         TextView pkgLabel = new TextView(this);
-        pkgLabel.setText("Target Game Package:");
+        pkgLabel.setText("目标游戏包名：");
         pkgLabel.setTextColor(Color.parseColor("#B0BEC5"));
         pkgLabel.setTextSize(12f);
         pkgLabel.setPadding(0, 4, 0, 2);
@@ -636,7 +636,7 @@ public class MainActivity extends Activity {
 
         // Action Buttons Row
         injectBtn = new Button(this);
-        injectBtn.setText("🚀 INJECT LAYER & LAUNCH GAME");
+        injectBtn.setText("🚀 注入图形层并启动游戏");
         injectBtn.setTextSize(14f);
         injectBtn.setAllCaps(true);
         injectBtn.setTypeface(null, Typeface.BOLD);
@@ -657,7 +657,7 @@ public class MainActivity extends Activity {
         });
 
         revertBtn = new Button(this);
-        revertBtn.setText("🛑 RESET / DESATIVAR VULKAN LAYER");
+        revertBtn.setText("🛑 重置 / 停用 Vulkan 层");
         revertBtn.setTextSize(13f);
         revertBtn.setAllCaps(true);
         revertBtn.setTypeface(null, Typeface.BOLD);
@@ -678,7 +678,7 @@ public class MainActivity extends Activity {
         });
 
         outputLogText = new TextView(this);
-        outputLogText.setText("System Output: Ready");
+        outputLogText.setText("系统输出：就绪");
         outputLogText.setTextColor(Color.parseColor("#ECEFF1"));
         outputLogText.setTextSize(12f);
         outputLogText.setPadding(12, 12, 12, 12);
@@ -720,21 +720,21 @@ public class MainActivity extends Activity {
             boolean hasVk = vkLayers != null && vkLayers.contains("VK_LAYER_GIMI_ARM64");
             String modeStr = (hasGles && hasVk) ? "Vulkan + OpenGL ES" : (hasGles ? "OpenGL ES (EGL)" : "Vulkan");
 
-            vulkanStatusText.setText("🟢 ACTIVE (" + modeStr + " Layer Injected for " + currentGpuApp + ")");
+            vulkanStatusText.setText("🟢 已启用（" + modeStr + " 层已注入到 " + currentGpuApp + "）");
             vulkanStatusText.setTextColor(Color.parseColor("#00E676"));
         } else if (status > 0) {
-            vulkanStatusText.setText("🟢 ACTIVE (Hook Loaded)");
+            vulkanStatusText.setText("🟢 已启用（钩子已加载）");
             vulkanStatusText.setTextColor(Color.parseColor("#00E676"));
         } else {
-            vulkanStatusText.setText("🔴 INACTIVE (Layer Disconnected / Reverted)");
+            vulkanStatusText.setText("🔴 未启用（图形层已断开/恢复）");
             vulkanStatusText.setTextColor(Color.parseColor("#FF5252"));
         }
 
         if (isGranted) {
-            adbStatusText.setText("⚡ Privileges Granted: WRITE_SECURE_SETTINGS Active");
+            adbStatusText.setText("⚡ 已授予权限：WRITE_SECURE_SETTINGS 生效");
             adbStatusText.setTextColor(Color.parseColor("#00E676"));
         } else {
-            adbStatusText.setText("⚠️ Privilege Pending: WRITE_SECURE_SETTINGS Missing");
+            adbStatusText.setText("⚠️ 等待权限：缺少 WRITE_SECURE_SETTINGS");
             adbStatusText.setTextColor(Color.parseColor("#FF9100"));
         }
     }
@@ -766,21 +766,21 @@ public class MainActivity extends Activity {
 
             Intent launchIntent = getPackageManager().getLaunchIntentForPackage(selectedPackage);
             if (launchIntent != null) {
-                outputLogText.setText("System Output: Injected!\nLib: " + libTarget + " (Exists: " + nativeLibFile.exists() + ")\nLaunching " + selectedPackage + "...");
+                outputLogText.setText("系统输出：已注入！\n库文件：" + libTarget + "（存在：" + nativeLibFile.exists() + "）\n正在启动 " + selectedPackage + "…");
                 outputLogText.setTextColor(Color.parseColor("#00E676"));
-                Toast.makeText(this, "Injetado com sucesso! Abrindo o jogo...", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "注入成功！正在打开游戏…", Toast.LENGTH_SHORT).show();
                 startActivity(launchIntent);
             } else {
-                outputLogText.setText("System Output: Layer enabled, but package " + selectedPackage + " is NOT installed!");
+                outputLogText.setText("系统输出：层已启用，但未安装包 " + selectedPackage + "！");
                 outputLogText.setTextColor(Color.parseColor("#FF9100"));
-                Toast.makeText(this, "Layer ativada, mas o pacote " + selectedPackage + " não está instalado!", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "层已启用，但未安装包 " + selectedPackage + "！", Toast.LENGTH_LONG).show();
             }
         } catch (SecurityException e) {
-            outputLogText.setText("SecurityException: WRITE_SECURE_SETTINGS not granted. Run ADB command above!");
+            outputLogText.setText("安全异常：未授予 WRITE_SECURE_SETTINGS。请执行上面的 ADB 命令！");
             outputLogText.setTextColor(Color.parseColor("#FF5252"));
-            Toast.makeText(this, "Execute o comando ADB de permissão!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "请先执行上面的 ADB 权限命令！", Toast.LENGTH_SHORT).show();
         } catch (Throwable e) {
-            outputLogText.setText("Error: " + e.getMessage());
+            outputLogText.setText("错误：" + e.getMessage());
             outputLogText.setTextColor(Color.parseColor("#FF5252"));
         }
     }
@@ -795,15 +795,15 @@ public class MainActivity extends Activity {
 
 
 
-            outputLogText.setText("System Output: Reverted Vulkan debug layer settings (Layer Disabled).");
+            outputLogText.setText("系统输出：已恢复 Vulkan 调试层设置（层已停用）。");
             outputLogText.setTextColor(Color.parseColor("#80D8FF"));
             refreshDashboardStatus();
-            Toast.makeText(this, "Vulkan Layer desativada e revertida!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Vulkan 层已停用并恢复！", Toast.LENGTH_SHORT).show();
         } catch (SecurityException e) {
-            outputLogText.setText("SecurityException: WRITE_SECURE_SETTINGS not granted.");
+            outputLogText.setText("安全异常：未授予 WRITE_SECURE_SETTINGS。");
             outputLogText.setTextColor(Color.parseColor("#FF5252"));
         } catch (Throwable e) {
-            outputLogText.setText("Error: " + e.getMessage());
+            outputLogText.setText("错误：" + e.getMessage());
             outputLogText.setTextColor(Color.parseColor("#FF5252"));
         }
     }
@@ -822,13 +822,13 @@ public class MainActivity extends Activity {
 
         LinearLayout searchCard = createCardLayout();
         TextView title = new TextView(this);
-        title.setText("Mod Manager");
+        title.setText("模组管理");
         title.setTextColor(Color.parseColor("#00E5FF"));
         title.setTextSize(18f);
         title.setTypeface(null, Typeface.BOLD);
 
         searchEditText = new EditText(this);
-        searchEditText.setHint("Search mods...");
+        searchEditText.setHint("搜索模组…");
         searchEditText.setHintTextColor(Color.parseColor("#78909C"));
         searchEditText.setTextColor(Color.WHITE);
         searchEditText.setTextSize(14f);
@@ -851,7 +851,7 @@ public class MainActivity extends Activity {
         });
 
         modCountText = new TextView(this);
-        modCountText.setText("Total Mods: 0");
+        modCountText.setText("模组总数：0");
         modCountText.setTextColor(Color.parseColor("#B0BEC5"));
         modCountText.setTextSize(13f);
         modCountText.setPadding(0, 12, 0, 4);
@@ -866,7 +866,7 @@ public class MainActivity extends Activity {
         actionRow.setLayoutParams(actionParams);
 
         Button enableAllBtn = new Button(this);
-        enableAllBtn.setText("Enable All ✅");
+        enableAllBtn.setText("全部启用 ✅");
         enableAllBtn.setTextSize(11f);
         enableAllBtn.setAllCaps(false);
         LinearLayout.LayoutParams enableParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
@@ -882,7 +882,7 @@ public class MainActivity extends Activity {
         });
 
         Button disableAllBtn = new Button(this);
-        disableAllBtn.setText("Disable All ❌");
+        disableAllBtn.setText("全部停用 ❌");
         disableAllBtn.setTextSize(11f);
         disableAllBtn.setAllCaps(false);
         LinearLayout.LayoutParams disableParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
@@ -898,7 +898,7 @@ public class MainActivity extends Activity {
         });
 
         Button refreshBtn = new Button(this);
-        refreshBtn.setText("Scan 🔄");
+        refreshBtn.setText("扫描 🔄");
         refreshBtn.setTextSize(11f);
         refreshBtn.setAllCaps(false);
         LinearLayout.LayoutParams refreshParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
@@ -968,12 +968,12 @@ public class MainActivity extends Activity {
         }
 
         if (modCountText != null) {
-            modCountText.setText("Mods: " + currentModsList.size() + " | Active: " + activeCount);
+            modCountText.setText("模组：" + currentModsList.size() + " | 已启用：" + activeCount);
         }
 
         if (filtered.isEmpty()) {
             TextView emptyText = new TextView(this);
-            emptyText.setText("No mods found in /sdcard/GIMI/Mods/\n\nDrop your 3dmigoto mod folders inside /sdcard/GIMI/Mods/ to manage them here!");
+            emptyText.setText("在 /sdcard/GIMI/Mods/ 中未找到模组。\n\n请将 3dmigoto 模组文件夹放入该目录后再进行管理！");
             emptyText.setTextColor(Color.parseColor("#78909C"));
             emptyText.setTextSize(13f);
             emptyText.setGravity(Gravity.CENTER);
@@ -999,7 +999,7 @@ public class MainActivity extends Activity {
             modName.setTypeface(null, Typeface.BOLD);
 
             TextView modDetails = new TextView(this);
-            modDetails.setText("Ini files: " + mod.getIniCount() + " | Path: " + mod.getPath());
+            modDetails.setText("Ini 文件：" + mod.getIniCount() + " | 路径：" + mod.getPath());
             modDetails.setTextColor(Color.parseColor("#B0BEC5"));
             modDetails.setTextSize(11f);
 
@@ -1037,13 +1037,13 @@ public class MainActivity extends Activity {
 
         LinearLayout settingsCard = createCardLayout();
         TextView title = new TextView(this);
-        title.setText("Settings & Directory Paths");
+        title.setText("设置与目录路径");
         title.setTextColor(Color.parseColor("#00E5FF"));
         title.setTextSize(18f);
         title.setTypeface(null, Typeface.BOLD);
 
         TextView pathLabel = new TextView(this);
-        pathLabel.setText("Mods Path Directory:");
+        pathLabel.setText("模组目录路径：");
         pathLabel.setTextColor(Color.parseColor("#B0BEC5"));
         pathLabel.setTextSize(12f);
         pathLabel.setPadding(0, 12, 0, 4);
@@ -1062,7 +1062,7 @@ public class MainActivity extends Activity {
 
         LinearLayout infoCard = createCardLayout();
         TextView infoTitle = new TextView(this);
-        infoTitle.setText("App & System Info");
+        infoTitle.setText("应用与系统信息");
         infoTitle.setTextColor(Color.parseColor("#00E5FF"));
         infoTitle.setTextSize(16f);
         infoTitle.setTypeface(null, Typeface.BOLD);

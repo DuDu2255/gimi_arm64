@@ -33,7 +33,7 @@ public class ShizukuManager {
             binderError = "SUCCESS";
             return true;
         }
-        binderError = "Shizuku.pingBinder() is false. The provider is registered in manifest, but binder was not received yet. Try again in 2 seconds.";
+        binderError = "Shizuku.pingBinder() 返回 false。提供程序已在清单中注册，但尚未收到 binder，请两秒后重试。";
         return false;
     }
 
@@ -75,8 +75,8 @@ public class ShizukuManager {
     public static String executeAdbCommandWithResult(String[] command) {
         try {
             if (!Shizuku.pingBinder()) {
-                return "ERROR: Shizuku binder is not active or authorized. Please open Shizuku and authorize GIMI Launcher.\n" +
-                       "Binder Diagnostics: " + binderError;
+                return "错误：Shizuku binder 未激活或未授权。请打开 Shizuku 并授权 GIMI 启动器。\n" +
+                       "Binder 诊断：" + binderError;
             }
             java.lang.reflect.Method method = Shizuku.class.getDeclaredMethod(
                 "newProcess", String[].class, String[].class, String.class
@@ -84,13 +84,13 @@ public class ShizukuManager {
             method.setAccessible(true);
             java.lang.Process p = (java.lang.Process) method.invoke(null, command, null, null);
             if (p == null) {
-                return "ERROR: Shizuku.newProcess returned null. This app might not be toggled ON in Shizuku Manager > Authorized applications.";
+                return "错误：Shizuku.newProcess 返回空值。请确认已在 Shizuku 管理器的“已授权应用”中启用本应用。";
             }
             int exitCode = p.waitFor();
             if (exitCode == 0) {
                 return "SUCCESS";
             } else {
-                return "ERROR: Process exited with code " + exitCode;
+                return "错误：进程退出码为 " + exitCode;
             }
         } catch (Throwable e) {
             Throwable cause = e;

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">GIMI Launcher</string>
-    <string name="title_dashboard">GIMI Launcher Dashboard</string>
-    <string name="title_mod_manager">Mod Manager</string>
-    <string name="title_settings">Settings &amp; Debug Info</string>
-    <string name="label_vulkan_layer_status">Vulkan Layer Status</string>
-    <string name="label_adb_status">ADB Privilege Status (WRITE_SECURE_SETTINGS)</string>
-    <string name="label_target_game">Target Game Variant</string>
-    <string name="btn_inject_launch">INJECT VULKAN LAYER &amp; LAUNCH</string>
-    <string name="system_output_ready">System Output: Ready</string>
+    <string name="app_name">GIMI 启动器</string>
+    <string name="title_dashboard">GIMI 启动器控制台</string>
+    <string name="title_mod_manager">模组管理</string>
+    <string name="title_settings">设置与调试信息</string>
+    <string name="label_vulkan_layer_status">Vulkan 层状态</string>
+    <string name="label_adb_status">ADB 权限状态（WRITE_SECURE_SETTINGS）</string>
+    <string name="label_target_game">目标游戏版本</string>
+    <string name="btn_inject_launch">注入 Vulkan 层并启动</string>
+    <string name="system_output_ready">系统输出：就绪</string>
 </resources>
