@@ -24,17 +24,17 @@ jobs:
 
     steps:
 
-      # ============================================================
+      # ==========================================================
       # 1. Checkout
-      # ============================================================
+      # ==========================================================
 
       - name: Checkout source
         uses: actions/checkout@v4
 
 
-      # ============================================================
+      # ==========================================================
       # 2. Java 17
-      # ============================================================
+      # ==========================================================
 
       - name: Setup JDK 17
         uses: actions/setup-java@v4
@@ -44,13 +44,13 @@ jobs:
           cache: gradle
 
 
-      # ============================================================
+      # ==========================================================
       # 3. Android SDK
       #
       # IMPORTANT:
-      # Do NOT install the old "tools" package.
-      # It no longer exists.
-      # ============================================================
+      # Do NOT install "tools".
+      # The old Android SDK tools package no longer exists.
+      # ==========================================================
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
@@ -58,16 +58,24 @@ jobs:
           packages: "platform-tools"
 
 
-      # ============================================================
-      # 4. Install Android SDK components
-      # ============================================================
+      # ==========================================================
+      # 4. Install Android SDK / NDK / CMake
+      # ==========================================================
 
       - name: Install Android SDK components
         shell: bash
         run: |
           set -euxo pipefail
 
+          echo "=========================================="
+          echo "Accept Android SDK licenses"
+          echo "=========================================="
+
           yes | sdkmanager --licenses >/dev/null || true
+
+          echo "=========================================="
+          echo "Install SDK packages"
+          echo "=========================================="
 
           sdkmanager \
             "platform-tools" \
@@ -77,67 +85,79 @@ jobs:
             "cmake;${CMAKE_VERSION}"
 
           echo
-          echo "========================================"
-          echo "Android SDK installed"
-          echo "========================================"
+          echo "=========================================="
+          echo "Installed packages"
+          echo "=========================================="
 
           sdkmanager --list_installed | grep -E \
             "platform-tools|platforms;android|build-tools|ndk;|cmake;" \
             || true
 
 
-      # ============================================================
-      # 5. Show environment
-      # ============================================================
+      # ==========================================================
+      # 5. Environment information
+      # ==========================================================
 
       - name: Show build environment
         shell: bash
         run: |
           set +e
 
-          echo "===== JAVA ====="
+          echo "=========================================="
+          echo "JAVA"
+          echo "=========================================="
           java -version
 
           echo
-          echo "===== JAVAC ====="
+          echo "=========================================="
+          echo "JAVAC"
+          echo "=========================================="
           javac -version
 
           echo
-          echo "===== CMAKE ====="
+          echo "=========================================="
+          echo "GRADLE ENVIRONMENT"
+          echo "=========================================="
+          echo "ANDROID_HOME=${ANDROID_HOME}"
+          echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT}"
+
+          echo
+          echo "=========================================="
+          echo "NDK"
+          echo "=========================================="
+          ls -la \
+            "${ANDROID_SDK_ROOT}/ndk/${ANDROID_NDK_VERSION}" \
+            || true
+
+          echo
+          echo "=========================================="
+          echo "CMAKE"
+          echo "=========================================="
           cmake --version
 
           echo
-          echo "===== NDK ====="
-          ls -la "${ANDROID_SDK_ROOT}/ndk/${ANDROID_NDK_VERSION}"
-
-          echo
-          echo "===== SDK ROOT ====="
-          echo "${ANDROID_SDK_ROOT}"
-
-          echo
-          echo "===== PROJECT ====="
+          echo "=========================================="
+          echo "PROJECT"
+          echo "=========================================="
           pwd
-          find . -maxdepth 2 -type f | sort | head -200
+
+          find . -maxdepth 2 -type f \
+            | sort \
+            | head -300
 
 
-      # ============================================================
+      # ==========================================================
       # 6. Remove duplicated Kotlin classes
       #
-      # The uploaded project contains both:
+      # Keep:
       #
       # GimiNativeBridge.java
-      # GimiNativeBridge.kt
-      #
       # ModInfo.java
-      # ModInfo.kt
       #
-      # They define the same JVM classes.
-      #
-      # MainActivity.java already uses the Java versions,
-      # so Java versions are kept.
-      # ============================================================
+      # Remove duplicated Kotlin versions.
+      # ==========================================================
 
-      - name: Remove duplicate Kotlin JNI classes
+      - name: Remove duplicate Kotlin classes
         shell: bash
         run: |
           set -euxo pipefail
@@ -148,21 +168,20 @@ jobs:
           rm -f \
             app/src/main/java/com/gimi/launcher/jni/ModInfo.kt
 
-          echo "Remaining JNI source files:"
-          find app/src/main/java/com/gimi/launcher/jni -type f -print
+          echo
+          echo "Remaining JNI files:"
+          find \
+            app/src/main/java/com/gimi/launcher/jni \
+            -type f \
+            -print \
+            || true
 
 
-      # ============================================================
+      # ==========================================================
       # 7. Patch CMakeLists.txt
-      #
-      # Android build should produce:
-      #
-      # libgimi_arm64.so
-      #
-      # We don't need the native desktop test executables.
-      # ============================================================
+      # ==========================================================
 
-      - name: Patch CMake for Android
+      - name: Patch CMake
         shell: bash
         run: |
           set -euxo pipefail
@@ -171,47 +190,86 @@ jobs:
           from pathlib import Path
 
           p = Path("CMakeLists.txt")
+
+          if not p.exists():
+              raise SystemExit("CMakeLists.txt not found")
+
           s = p.read_text()
 
-          # --------------------------------------------------------
-          # Disable desktop test executables when building Android.
-          # --------------------------------------------------------
+          # ------------------------------------------------------
+          # Remove desktop test executables.
+          # Android should only build the shared library.
+          # ------------------------------------------------------
 
-          start1 = s.find("# ─── Executable: Launcher Integration Tests")
-          start2 = s.find("# ─── Executable: E2E Real Mod Tests")
-          start3 = s.find("# ─── Shared Library Target")
+          markers = [
+              "# ─── Executable: Launcher Integration Tests",
+              "# ─── Executable: E2E Real Mod Tests",
+          ]
 
-          if start1 != -1 and start3 != -1:
-              s = s[:start1] + s[start3:]
+          shared_marker = "# ─── Shared Library Target"
 
-          # --------------------------------------------------------
-          # Replace hardcoded Termux include paths.
-          # --------------------------------------------------------
+          shared_pos = s.find(shared_marker)
+
+          if shared_pos != -1:
+              first_test = min(
+                  [
+                      x for x in
+                      [s.find(m) for m in markers]
+                      if x != -1
+                  ],
+                  default=-1
+              )
+
+              if first_test != -1 and first_test < shared_pos:
+                  s = s[:first_test] + s[shared_pos:]
+
+          # ------------------------------------------------------
+          # Remove Termux-only include path.
+          # ------------------------------------------------------
 
           s = s.replace(
-              "    /usr/include\n"
-              "    /data/data/com.termux/files/usr/include\n",
+              "/data/data/com.termux/files/usr/include",
               ""
           )
 
-          # --------------------------------------------------------
-          # Add Android-specific handling.
-          # --------------------------------------------------------
+          # ------------------------------------------------------
+          # Remove hardcoded /usr/include.
+          # ------------------------------------------------------
 
-          marker = "project(gimi_arm64 VERSION 0.1.0 LANGUAGES C CXX)"
+          s = s.replace(
+              "    /usr/include\n",
+              ""
+          )
 
-          addition = r'''
-          
-          # Android builds are produced through Gradle/NDK.
+          # ------------------------------------------------------
+          # Add Android information.
+          # ------------------------------------------------------
+
+          project_marker = \
+              "project(gimi_arm64 VERSION 0.1.0 LANGUAGES C CXX)"
+
+          android_block = r'''
+
+          # ======================================================
+          # Android / NDK build
+          # ======================================================
+
           if(ANDROID)
-              message(STATUS "GIMI: Android/NDK build")
-              message(STATUS "GIMI: ABI = ${ANDROID_ABI}")
-              message(STATUS "GIMI: Platform = ${ANDROID_PLATFORM}")
+              message(STATUS "==========================================")
+              message(STATUS "GIMI Android build")
+              message(STATUS "ANDROID_ABI=${ANDROID_ABI}")
+              message(STATUS "ANDROID_PLATFORM=${ANDROID_PLATFORM}")
+              message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
+              message(STATUS "==========================================")
           endif()
           '''
 
-          if addition.strip() not in s:
-              s = s.replace(marker, marker + addition, 1)
+          if "GIMI Android build" not in s:
+              s = s.replace(
+                  project_marker,
+                  project_marker + android_block,
+                  1
+              )
 
           p.write_text(s)
 
@@ -219,35 +277,31 @@ jobs:
           PY
 
           echo
-          echo "===== CMAKE TARGETS ====="
+          echo "=========================================="
+          echo "CMake targets"
+          echo "=========================================="
+
           grep -nE \
             "add_library|add_executable|target_link_libraries|ANDROID" \
-            CMakeLists.txt || true
+            CMakeLists.txt \
+            || true
 
 
-      # ============================================================
-      # 8. Replace the old hybrid app/build.gradle
+      # ==========================================================
+      # 8. Create Android Gradle configuration
       #
-      # The old version detects ARM64 host and runs
-      # build_termux.sh.
+      # We intentionally DO NOT use the repository's
+      # android/gradlew.
       #
-      # GitHub Actions is NOT Termux, so we use normal Gradle.
-      # ============================================================
+      # GitHub Actions installs Gradle directly.
+      # ==========================================================
 
       - name: Configure Android Gradle project
         shell: bash
         run: |
           set -euxo pipefail
 
-          cat > build.gradle <<'EOF'
-          plugins {
-              id 'com.android.application' version '8.2.2' apply false
-          }
-
-          tasks.register('clean', Delete) {
-              delete rootProject.buildDir
-          }
-          EOF
+          mkdir -p app
 
           cat > settings.gradle <<'EOF'
           pluginManagement {
@@ -259,7 +313,9 @@ jobs:
           }
 
           dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositoriesMode.set(
+                  RepositoriesMode.FAIL_ON_PROJECT_REPOS
+              )
 
               repositories {
                   google()
@@ -269,8 +325,20 @@ jobs:
 
           rootProject.name = "GIMI-Launcher"
 
-          include ":app"
+          include(":app")
           EOF
+
+
+          cat > build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application' version '8.2.2' apply false
+          }
+
+          tasks.register("clean", Delete) {
+              delete rootProject.buildDir
+          }
+          EOF
+
 
           cat > gradle.properties <<'EOF'
           org.gradle.jvmargs=-Xmx4096m -Dfile.encoding=UTF-8
@@ -278,13 +346,12 @@ jobs:
           android.useAndroidX=true
           android.nonTransitiveRClass=true
 
-          android.defaults.buildfeatures.buildconfig=true
-
           org.gradle.daemon=false
           org.gradle.parallel=true
           org.gradle.caching=true
           org.gradle.vfs.watch=false
           EOF
+
 
           cat > app/build.gradle <<'EOF'
           plugins {
@@ -292,7 +359,7 @@ jobs:
           }
 
           android {
-              namespace 'com.gimi.launcher'
+              namespace "com.gimi.launcher"
 
               compileSdk 36
 
@@ -306,14 +373,14 @@ jobs:
                   versionName "1.2.0"
 
                   ndk {
-                      abiFilters 'arm64-v8a'
+                      abiFilters "arm64-v8a"
                   }
 
                   externalNativeBuild {
                       cmake {
                           arguments \
-                              "-DANDROID_STL=c++_static",
-                              "-DCMAKE_CXX_STANDARD=20",
+                              "-DANDROID_STL=c++_static", \
+                              "-DCMAKE_CXX_STANDARD=20", \
                               "-DCMAKE_BUILD_TYPE=Release"
 
                           targets "gimi_arm64"
@@ -328,6 +395,7 @@ jobs:
                   }
 
                   release {
+                      debuggable false
                       minifyEnabled false
                       shrinkResources false
                   }
@@ -360,34 +428,40 @@ jobs:
           }
 
           dependencies {
-              implementation 'androidx.core:core:1.13.1'
+              implementation "androidx.core:core:1.13.1"
 
-              implementation 'dev.rikka.shizuku:api:13.1.5'
-              implementation 'dev.rikka.shizuku:provider:13.1.5'
+              implementation "dev.rikka.shizuku:api:13.1.5"
+              implementation "dev.rikka.shizuku:provider:13.1.5"
           }
           EOF
 
 
-      # ============================================================
-      # 9. Fix Android Manifest
-      # ============================================================
+      # ==========================================================
+      # 9. Normalize AndroidManifest
+      # ==========================================================
 
       - name: Normalize AndroidManifest
         shell: bash
         run: |
           set -euxo pipefail
 
+          MANIFEST="app/src/main/AndroidManifest.xml"
+
+          if [ ! -f "$MANIFEST" ]; then
+              echo "ERROR: AndroidManifest.xml not found"
+              exit 1
+          fi
+
           python3 <<'PY'
           from pathlib import Path
+          import re
 
           p = Path("app/src/main/AndroidManifest.xml")
+
           s = p.read_text()
 
-          # AGP handles SDK versions through build.gradle.
-          # Remove the explicit <uses-sdk> block to avoid
-          # conflicting declarations.
-
-          import re
+          # Remove explicit uses-sdk declarations.
+          # SDK versions are controlled by Gradle.
 
           s = re.sub(
               r'\s*<uses-sdk\b[^>]*/>',
@@ -397,66 +471,63 @@ jobs:
 
           p.write_text(s)
 
-          print("AndroidManifest.xml normalized.")
+          print("AndroidManifest normalized.")
           PY
 
-          grep -n "uses-sdk" app/src/main/AndroidManifest.xml || true
+          echo
+          cat "$MANIFEST"
 
 
-      # ============================================================
-      # 10. Make Gradle wrapper usable
+      # ==========================================================
+      # 10. Setup Gradle
       #
-      # The repository contains the wrapper under android/.
-      # We reuse it from the root project.
-      # ============================================================
+      # IMPORTANT:
+      #
+      # We DO NOT call:
+      #
+      # ./android/gradlew
+      #
+      # We DO NOT download:
+      #
+      # gradle-8.2.2-bin.zip
+      #
+      # GitHub Actions installs Gradle 8.5 directly.
+      # ==========================================================
 
-      - name: Configure Gradle wrapper
+      - name: Setup Gradle 8.5
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.5"
+
+
+      # ==========================================================
+      # 11. Verify Gradle
+      # ==========================================================
+
+      - name: Verify Gradle
         shell: bash
         run: |
           set -euxo pipefail
 
-          chmod +x android/gradlew
+          echo "=========================================="
+          echo "Gradle version"
+          echo "=========================================="
 
-          python3 <<'PY'
-          from pathlib import Path
+          gradle --version
 
-          p = Path(
-              "android/gradle/wrapper/gradle-wrapper.properties"
-          )
+          echo
+          echo "=========================================="
+          echo "Gradle tasks"
+          echo "=========================================="
 
-          s = p.read_text()
-
-          s = s.replace(
-              "gradle-8.5-rc-4-bin.zip",
-              "gradle-8.2.2-bin.zip"
-          )
-
-          p.write_text(s)
-          PY
-
-          grep distributionUrl \
-            android/gradle/wrapper/gradle-wrapper.properties
-
-
-      # ============================================================
-      # 11. Verify Gradle project
-      # ============================================================
-
-      - name: Gradle project check
-        shell: bash
-        run: |
-          set -euxo pipefail
-
-          ./android/gradlew \
-            -p . \
-            tasks \
+          gradle tasks \
             --no-daemon \
             --stacktrace
 
 
-      # ============================================================
-      # 12. Build ARM64 Debug APK
-      # ============================================================
+      # ==========================================================
+      # 12. Build Debug APK
+      # ==========================================================
 
       - name: Build ARM64 Debug APK
         shell: bash
@@ -465,57 +536,64 @@ jobs:
         run: |
           set -euxo pipefail
 
-          ./android/gradlew \
-            -p . \
-            :app:assembleDebug \
+          echo "=========================================="
+          echo "BUILD GIMI ARM64 APK"
+          echo "=========================================="
+
+          gradle :app:assembleDebug \
             --no-daemon \
             --stacktrace \
             --info
 
 
-      # ============================================================
-      # 13. Find generated APK
-      # ============================================================
+      # ==========================================================
+      # 13. Find APK
+      # ==========================================================
 
-      - name: Find APK
+      - name: Find generated APK
         shell: bash
         run: |
           set -euxo pipefail
 
-          echo "========================================"
-          echo "APK files"
-          echo "========================================"
+          echo "=========================================="
+          echo "Generated APK"
+          echo "=========================================="
 
           find app/build/outputs \
             -type f \
-            \( -name "*.apk" -o -name "*.aab" \) \
+            -name "*.apk" \
             -print
 
           echo
-          echo "========================================"
-          echo "Native libraries"
-          echo "========================================"
+          echo "=========================================="
+          echo "Generated native libraries"
+          echo "=========================================="
 
           find app/build \
             -type f \
-            -name "libgimi_arm64.so" \
-            -print
+            -name "*.so" \
+            -print \
+            | grep "arm64-v8a" \
+            || true
 
 
-      # ============================================================
-      # 14. Verify APK contains ARM64 native library
-      # ============================================================
+      # ==========================================================
+      # 14. Verify APK
+      # ==========================================================
 
-      - name: Verify APK architecture
+      - name: Verify ARM64 APK
         shell: bash
         run: |
           set -euxo pipefail
 
-          APK="$(find app/build/outputs/apk/debug \
-            -type f -name '*.apk' | head -n 1)"
+          APK="$(find \
+            app/build/outputs/apk/debug \
+            -type f \
+            -name "*.apk" \
+            | head -n 1)"
 
           if [ -z "$APK" ]; then
-              echo "ERROR: APK not found."
+              echo "ERROR: APK not found!"
               exit 1
           fi
 
@@ -523,35 +601,65 @@ jobs:
           echo "$APK"
 
           echo
-          echo "APK contents:"
-          unzip -l "$APK" | grep -E \
-            "lib/arm64-v8a|libgimi_arm64.so|AndroidManifest.xml" \
+          echo "=========================================="
+          echo "APK contents"
+          echo "=========================================="
+
+          unzip -l "$APK" \
+            | grep -E \
+              "lib/arm64-v8a/|AndroidManifest.xml" \
             || true
 
           echo
-          echo "APK size:"
+          echo "=========================================="
+          echo "Check ARM64"
+          echo "=========================================="
+
+          if unzip -l "$APK" \
+              | grep -q "lib/arm64-v8a/"; then
+
+              echo "ARM64-v8a library detected."
+
+          else
+
+              echo "ERROR: ARM64-v8a library NOT found!"
+              exit 1
+
+          fi
+
+          echo
+          echo "=========================================="
+          echo "APK size"
+          echo "=========================================="
+
           ls -lh "$APK"
 
 
-      # ============================================================
-      # 15. APK Badging
-      # ============================================================
+      # ==========================================================
+      # 15. APK metadata
+      # ==========================================================
 
-      - name: Verify APK metadata
+      - name: Dump APK metadata
         shell: bash
         run: |
-          set -euxo pipefail
+          set +e
 
-          APK="$(find app/build/outputs/apk/debug \
-            -type f -name '*.apk' | head -n 1)"
+          APK="$(find \
+            app/build/outputs/apk/debug \
+            -type f \
+            -name "*.apk" \
+            | head -n 1)"
 
-          "${ANDROID_SDK_ROOT}/build-tools/${ANDROID_BUILD_TOOLS}/aapt2" \
-            dump badging "$APK" || true
+          AAPT="${ANDROID_SDK_ROOT}/build-tools/${ANDROID_BUILD_TOOLS}/aapt2"
+
+          if [ -x "$AAPT" ]; then
+              "$AAPT" dump badging "$APK"
+          fi
 
 
-      # ============================================================
+      # ==========================================================
       # 16. Upload APK
-      # ============================================================
+      # ==========================================================
 
       - name: Upload GIMI ARM64 APK
         uses: actions/upload-artifact@v4
@@ -563,15 +671,15 @@ jobs:
           retention-days: 30
 
 
-      # ============================================================
-      # 17. Upload native library separately
-      # ============================================================
+      # ==========================================================
+      # 17. Upload native library
+      # ==========================================================
 
       - name: Upload GIMI ARM64 native library
         uses: actions/upload-artifact@v4
         with:
           name: GIMI-libgimi-arm64
           path: |
-            app/build/intermediates/cmake/**/obj/arm64-v8a/libgimi_arm64.so
+            app/build/intermediates/cmake/**/obj/arm64-v8a/*.so
           if-no-files-found: warn
           retention-days: 30
