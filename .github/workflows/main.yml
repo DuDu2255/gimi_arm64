@@ -388,6 +388,12 @@ jobs:
                   }
               }
 
+              applicationVariants.all { variant ->
+                  variant.outputs.all {
+                      outputFileName = 'GIMI 原神模组加载器.apk'
+                  }
+              }
+
               buildTypes {
                   debug {
                       debuggable true
@@ -664,7 +670,7 @@ jobs:
       - name: Upload GIMI ARM64 APK
         uses: actions/upload-artifact@v4
         with:
-          name: GIMI-Launcher-ARM64-Debug
+          name: GIMI 原神模组加载器
           path: |
             app/build/outputs/apk/debug/*.apk
           if-no-files-found: error

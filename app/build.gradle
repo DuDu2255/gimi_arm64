@@ -37,6 +37,12 @@ if (!isArm64Host) {
         kotlinOptions {
             jvmTarget = '17'
         }
+
+        applicationVariants.all { variant ->
+            variant.outputs.all {
+                outputFileName = 'GIMI 原神模组加载器.apk'
+            }
+        }
     }
 
     dependencies {
@@ -53,9 +59,8 @@ if (!isArm64Host) {
             def outDir = file("${buildDir}/outputs/apk/debug")
             outDir.mkdirs()
             copy {
-                from '../GIMI-Launcher.apk'
+                from '../GIMI 原神模组加载器.apk'
                 into outDir
-                rename { 'app-debug.apk' }
             }
         }
     }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">GIMI 启动器</string>
-    <string name="title_dashboard">GIMI 启动器控制台</string>
+    <string name="app_name">GIMI 原神模组加载器</string>
+    <string name="title_dashboard">GIMI 原神模组加载器控制台</string>
     <string name="title_mod_manager">模组管理</string>
     <string name="title_settings">设置与调试信息</string>
     <string name="label_vulkan_layer_status">Vulkan 层状态</string>

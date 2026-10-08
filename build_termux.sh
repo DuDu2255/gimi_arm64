@@ -2,7 +2,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # gimi_arm64 — Lightweight Termux Build & Packaging Script
 # Compiles C++20 libgimi_arm64.so, processes Android resources, compiles
-# Kotlin & Java sources (kotlinc + D8), and signs GIMI-Launcher.apk.
+# Kotlin & Java sources (kotlinc + D8), and signs GIMI 原神模组加载器.apk.
 # ─────────────────────────────────────────────────────────────────────────────
 
 set -e
@@ -227,8 +227,8 @@ if [ ! -f "build/dex/classes.dex" ] || [ ! -s "build/dex/classes.dex" ]; then
     exit 1
 fi
 
-# ─── 6. Assemble, Align & Sign GIMI-Launcher.apk ─────────────────────────────
-echo -e "\n${YELLOW}📦 Assembling, aligning, and signing GIMI-Launcher.apk...${NC}"
+# ─── 6. Assemble, Align & Sign GIMI 原神模组加载器.apk ─────────────────────────────
+echo -e "\n${YELLOW}📦 Assembling, aligning, and signing GIMI 原神模组加载器.apk...${NC}"
 
 # Extract base resources if available, otherwise prepare fresh structure
 rm -rf build/apk_contents/*
@@ -264,7 +264,7 @@ cd "$ROOT_DIR"
 
 UNALIGNED_APK="build/GIMI-Launcher-unaligned.apk"
 ALIGNED_APK="build/GIMI-Launcher-aligned.apk"
-FINAL_APK="GIMI-Launcher.apk"
+FINAL_APK="GIMI 原神模组加载器.apk"
 
 # Zipalign
 if command -v zipalign >/dev/null 2>&1 && [ -f "$UNALIGNED_APK" ]; then
@@ -283,9 +283,9 @@ else
     cp "$ALIGNED_APK" "$FINAL_APK" 2>/dev/null || true
 fi
 
-# Also output to standard AGP debug path app/build/outputs/apk/debug/app-debug.apk
+# Also output the named APK to the AGP debug directory.
 mkdir -p app/build/outputs/apk/debug
-cp "$FINAL_APK" app/build/outputs/apk/debug/app-debug.apk 2>/dev/null || true
+cp "$FINAL_APK" "app/build/outputs/apk/debug/$FINAL_APK" 2>/dev/null || true
 
 # ─── 7. Summary & Verification ───────────────────────────────────────────────
 echo -e "\n${GREEN}=====================================================${NC}"
@@ -298,7 +298,7 @@ fi
 
 if [ -f "$FINAL_APK" ]; then
     echo -e "  - Launcher APK:   ${CYAN}$FINAL_APK${NC} ($(du -h "$FINAL_APK" | cut -f1))"
-    echo -e "  - AGP Debug APK:  ${CYAN}app/build/outputs/apk/debug/app-debug.apk${NC}"
+    echo -e "  - AGP Debug APK:  ${CYAN}app/build/outputs/apk/debug/$FINAL_APK${NC}"
     if command -v apksigner >/dev/null 2>&1 && [ -f "$KEYSTORE" ]; then
         echo -e "  - Signature Status:"
         apksigner verify --min-sdk-version 26 "$FINAL_APK" && echo -e "    ${GREEN}✔ APK Signature Verified Cleanly!${NC}" || echo -e "    ${YELLOW}⚠️ Signature Verification Warning${NC}"

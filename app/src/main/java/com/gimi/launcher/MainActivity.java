@@ -197,7 +197,7 @@ public class MainActivity extends Activity {
         headerLayout.setPadding(8, 8, 8, 20);
 
         TextView titleText = new TextView(this);
-        titleText.setText("GIMI 启动器");
+        titleText.setText(R.string.app_name);
         titleText.setTextColor(Color.parseColor("#00E5FF"));
         titleText.setTextSize(26f);
         titleText.setTypeface(null, Typeface.BOLD);
@@ -1069,7 +1069,7 @@ public class MainActivity extends Activity {
 
         TextView infoDetails = new TextView(this);
         infoDetails.setText(
-            "App Name: GIMI Launcher\n" +
+            "应用名称：" + getString(R.string.app_name) + "\n" +
             "Version: 1.0.0 (Release v1.0)\n" +
             "Architecture: ARM64 (arm64-v8a)\n" +
             "Graphics API: Vulkan 1.3 / OpenGL ES 3.2\n" +
